@@ -1,20 +1,20 @@
-import path from 'path';
-import { Storage, GetSignedUrlConfig } from '@google-cloud/storage';
-import uuid from 'uuid/v4';
+import { GetSignedUrlConfig, Storage } from "@google-cloud/storage";
+import path from "path";
+import { v4 as uuid } from "uuid";
 
 export interface Config {
   bucketName: string;
   host: string;
 }
 
-type Urls = {
+interface Urls {
   urlToUpload: string;
   publicUrl: string;
 }
 
 interface GoogleStorageService {
-  generateUrls: (userId: string, originalFileName: string) => Promise<Urls>,
-};
+  generateUrls: (userId: string, originalFileName: string) => Promise<Urls>;
+}
 
 export class GoogleCloudStorageService implements GoogleStorageService {
   private config: Config;
@@ -39,24 +39,21 @@ export class GoogleCloudStorageService implements GoogleStorageService {
 
   public async generateUrls(userId, originalFileName) {
     const options: GetSignedUrlConfig = {
-      version: 'v4',
-      action: 'write',
+      version: "v4",
+      action: "write",
       expires: Date.now() + 1000 * 60 * 60,
-      contentType: 'application/octet-stream',
+      contentType: "application/octet-stream"
     };
 
     const fileName: string = this.generateFileName(userId, originalFileName);
 
-    const [url] = await this.storage
+    const [urlToUpload] = await this.storage
       .bucket(this.config.bucketName)
       .file(fileName)
       .getSignedUrl(options);
 
     const publicUrl = this.generatePublicUrl(fileName);
 
-    return {
-      urlToUpload: url,
-      publicUrl,
-    }
+    return { urlToUpload, publicUrl };
   }
 }
