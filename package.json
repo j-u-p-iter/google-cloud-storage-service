@@ -1,0 +1,36 @@
+{
+  "name": "@j.u.p.iter/google-cloud-storage-service",
+  "version": "0.0.0-semantically-released",
+  "description": "Google Cloud Storage Service",
+  "keywords": [
+    "google",
+    "cloud storage",
+    "service"
+  ],
+  "main": "dist/lib/google-cloud-storage-service.cjs.js",
+  "module": "dist/lib/google-cloud-storage-service.esm.js",
+  "repository": "git@github.com:j-u-p-iter/google-cloud-storage-service.git",
+  "author": "Leontyev Kirill (j.u.p.iter) <pn79122821224@gmail.com> (http://j-u-p-iter.pro/)",
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "scripts": {
+    "commit": "jupiter-scripts precommit",
+    "build": "jupiter-scripts build",
+    "start": "yarn run build --watch",
+    "lint": "jupiter-scripts lint --format codeFrame",
+    "lint:fix": "yarn run lint --fix",
+    "test": "jupiter-scripts test"
+  },
+  "devDependencies": {
+    "@j.u.p.iter/jupiter-scripts": "^1.6.0",
+    "@types/nock": "^10.0.3",
+    "@types/qs": "^6.5.3",
+    "nock": "^10.0.6",
+    "qs": "^6.7.0"
+  },
+  "dependencies": {
+    "@google-cloud/storage": "^3.2.1"
+  }
+}
