@@ -42,7 +42,7 @@ describe('GoogleCloudStorageService', () => {
       bucketName,
     });
 
-    const result = await service.generateUrls(userId, originalFileName); 
+    const [result] = await service.generateUrls(userId, [originalFileName]); 
 
     expect(result).toEqual({
       urlToUpload: expectedUrlToUpload,

@@ -7,13 +7,15 @@ export interface Config {
   host: string;
 }
 
-interface Urls {
+interface Url {
   urlToUpload: string;
   publicUrl: string;
 }
 
+type Urls = Url[];
+
 interface GoogleStorageService {
-  generateUrls: (userId: string, originalFileName: string) => Promise<Urls>;
+  generateUrls: (userId: string, originalFilesNames: string[]) => Promise<Urls>;
 }
 
 export class GoogleCloudStorageService implements GoogleStorageService {
@@ -25,19 +27,26 @@ export class GoogleCloudStorageService implements GoogleStorageService {
     this.storage = new Storage();
   }
 
-  private generateFileName(userId, originalFileName) {
-    const fileExtension = path.extname(originalFileName);
+  private generateFilesNames(
+    userId: string,
+    originalFilesNames: string[]
+  ): string[] {
+    return originalFilesNames.map(originalFileName => {
+      const fileExtension = path.extname(originalFileName);
 
-    return `${userId}/${uuid()}${fileExtension}`;
+      return `${userId}/${uuid()}${fileExtension}`;
+    });
   }
 
-  private generatePublicUrl(fileName: string): string {
-    const { host, bucketName } = this.config;
+  private generatePublicUrl(filesNames: string[]): string[] {
+    return filesNames.map(fileName => {
+      const { host, bucketName } = this.config;
 
-    return `${host}/${bucketName}/${fileName}`;
+      return `${host}/${bucketName}/${fileName}`;
+    });
   }
 
-  public async generateUrls(userId, originalFileName) {
+  public async generateUrls(userId, originalFilesNames) {
     const options: GetSignedUrlConfig = {
       version: "v4",
       action: "write",
@@ -45,15 +54,21 @@ export class GoogleCloudStorageService implements GoogleStorageService {
       contentType: "application/octet-stream"
     };
 
-    const fileName: string = this.generateFileName(userId, originalFileName);
+    const filesNames = this.generateFilesNames(userId, originalFilesNames);
 
-    const [urlToUpload] = await this.storage
-      .bucket(this.config.bucketName)
-      .file(fileName)
-      .getSignedUrl(options);
+    const urlsToUpload = await Promise.all(
+      filesNames.map(fileName => {
+        return this.storage
+          .bucket(this.config.bucketName)
+          .file(fileName)
+          .getSignedUrl(options);
+      })
+    );
 
-    const publicUrl = this.generatePublicUrl(fileName);
+    const publicUrls = this.generatePublicUrl(filesNames);
 
-    return { urlToUpload, publicUrl };
+    return urlsToUpload.map(([urlToUpload], index) => {
+      return { urlToUpload, publicUrl: publicUrls[index] };
+    });
   }
 }
