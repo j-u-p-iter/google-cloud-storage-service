@@ -23,7 +23,7 @@
     "test": "jupiter-scripts test"
   },
   "devDependencies": {
-    "@j.u.p.iter/jupiter-scripts": "^1.6.0",
+    "@j.u.p.iter/jupiter-scripts": "^1.17.0",
     "@types/nock": "^10.0.3",
     "@types/qs": "^6.5.3",
     "nock": "^10.0.6",
