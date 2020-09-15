@@ -1,5 +1,6 @@
 import { GetSignedUrlConfig, Storage } from "@google-cloud/storage";
-import path from "path";
+import axios from "axios";
+import * as path from "path";
 import { v4 as uuid } from "uuid";
 
 export interface Config {
@@ -70,5 +71,23 @@ export class GoogleCloudStorageService implements GoogleStorageService {
     return urlsToUpload.map(([urlToUpload], index) => {
       return { urlToUpload, publicUrl: publicUrls[index] };
     });
+  }
+
+  public async uploadFiles(userId: string, filesData: File[]) {
+    const originalFilesNames = filesData.map(({ name }) => name);
+
+    const urls = await this.generateUrls(userId, originalFilesNames);
+
+    const uploadUrls = urls.map(({ urlToUpload }) => urlToUpload);
+
+    await Promise.all(
+      uploadUrls.map((uploadUrl, index) => {
+        axios.post(uploadUrl, filesData[index]);
+      })
+    );
+
+    const publicUrls = urls.map(({ publicUrl }) => publicUrl);
+
+    return publicUrls;
   }
 }

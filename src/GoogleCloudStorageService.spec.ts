@@ -1,6 +1,7 @@
 import { Storage } from '@google-cloud/storage';
 import { GoogleCloudStorageService } from '.';
 import { v4 as uuid } from 'uuid';
+import nock from 'nock';
 
 jest.mock('@google-cloud/storage');
 jest.mock('uuid');
@@ -12,6 +13,7 @@ describe('GoogleCloudStorageService', () => {
   let originalFileName;
   let bucketName;
   let host;
+  let generatePublicURL;
 
   beforeAll(async () => {
     bucketName = 'someBucketName';
@@ -23,6 +25,10 @@ describe('GoogleCloudStorageService', () => {
 
     uuid.mockImplementation(() => mockedUUID);
     
+    nock(expectedUrlToUpload)
+      .post('/')
+      .reply(200);
+
     (Storage as any).mockImplementation(() => {
       return {
         bucket: () => ({
@@ -34,6 +40,10 @@ describe('GoogleCloudStorageService', () => {
         })
       }
     });
+
+    generatePublicURL = () => {
+      return `${host}/${bucketName}/${userId}/${mockedUUID}.${originalFileName.split('.')[1]}`;
+    }
   });
 
   it('returns urlToUpload and publicUrl', async () => {
@@ -49,4 +59,14 @@ describe('GoogleCloudStorageService', () => {
       publicUrl: `${host}/${bucketName}/${userId}/${mockedUUID}.${originalFileName.split('.')[1]}`  
     })
   });
-});
+
+  it('uploads files properly', async () => {
+    const service = new GoogleCloudStorageService({
+      host,
+      bucketName,
+    });
+
+    const publicUrls = await service.uploadFiles(userId, [{ name: originalFileName}] as File[])
+
+    expect(publicUrls.length).toBe(1);
+    expect(publicUrls[0]).toBe(generatePublicURL()); }); });
