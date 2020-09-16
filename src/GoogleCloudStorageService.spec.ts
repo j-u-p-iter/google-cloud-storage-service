@@ -35,8 +35,9 @@ describe('GoogleCloudStorageService', () => {
           file: () => ({
             getSignedUrl: async () => {
               return [expectedUrlToUpload];
-            }
-          })
+            },
+            delete: () => {},
+          }),
         })
       }
     });
@@ -69,4 +70,17 @@ describe('GoogleCloudStorageService', () => {
     const publicUrls = await service.uploadFiles(userId, [{ name: originalFileName}] as File[])
 
     expect(publicUrls.length).toBe(1);
-    expect(publicUrls[0]).toBe(generatePublicURL()); }); });
+    expect(publicUrls[0]).toBe(generatePublicURL()); 
+  }); 
+
+  it('deletes files properly', async () => {
+    const service = new GoogleCloudStorageService({
+      host,
+      bucketName,
+    });
+
+    const removedFilesNames = await service.deleteFiles([generatePublicURL()])
+
+    expect(removedFilesNames).toEqual([originalFileName]);
+  });
+});

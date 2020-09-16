@@ -73,7 +73,10 @@ export class GoogleCloudStorageService implements GoogleStorageService {
     });
   }
 
-  public async uploadFiles(userId: string, filesData: File[]) {
+  public async uploadFiles(
+    userId: string,
+    filesData: File[]
+  ): Promise<string[]> {
     const originalFilesNames = filesData.map(({ name }) => name);
 
     const urls = await this.generateUrls(userId, originalFilesNames);
@@ -89,5 +92,24 @@ export class GoogleCloudStorageService implements GoogleStorageService {
     const publicUrls = urls.map(({ publicUrl }) => publicUrl);
 
     return publicUrls;
+  }
+
+  public async deleteFiles(publicUrls: string[]): Promise<string[]> {
+    const filesNames = publicUrls.map(publicUrl => {
+      const urlParts = publicUrl.split("/");
+
+      return urlParts[urlParts.length - 1];
+    });
+
+    await Promise.all(
+      filesNames.map(fileName => {
+        this.storage
+          .bucket(this.config.bucketName)
+          .file(fileName)
+          .delete();
+      })
+    );
+
+    return filesNames;
   }
 }
