@@ -81,6 +81,6 @@ describe('GoogleCloudStorageService', () => {
 
     const removedFilesNames = await service.deleteFiles([generatePublicURL()])
 
-    expect(removedFilesNames).toEqual([originalFileName]);
+    expect(removedFilesNames).toEqual([`${mockedUUID}.png`]);
   });
 });
