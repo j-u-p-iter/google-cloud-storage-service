@@ -8,6 +8,7 @@
     "service"
   ],
   "main": "dist/lib/index.js",
+  "typings": "dist/types",
   "repository": "git@github.com:j-u-p-iter/google-cloud-storage-service.git",
   "author": "Leontyev Kirill (j.u.p.iter) <pn79122821224@gmail.com> (http://j-u-p-iter.pro/)",
   "files": [
@@ -16,7 +17,7 @@
   "license": "MIT",
   "scripts": {
     "commit": "jupiter-scripts precommit",
-    "build": "jupiter-scripts build",
+    "build": "jupiter-scripts build --module=CommonJS",
     "start": "yarn run build --watch",
     "lint": "jupiter-scripts lint --format codeFrame",
     "lint:fix": "yarn run lint --fix",
